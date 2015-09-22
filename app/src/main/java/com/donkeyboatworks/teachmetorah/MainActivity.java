@@ -25,6 +25,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.text.BreakIterator;
 import java.util.Locale;
 
@@ -66,10 +68,10 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         //makeRequest();
 
         String request = SEFARIA_URL + TOC_URI;
-        getTOC(request);
+        //getTOC(request);
 
 //        String request = SEFARIA_URL + TEXTS_URI + SHULCHAN_ARUCH + "." + currentPage;
-//        getVerses(request);
+        getVerses(request);
     }
 
     @Override
@@ -131,6 +133,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     private void getTOC(final String searchString) {
 
+        Log.w("josh", searchString);
+
         String response = versesDB.getVerseByUrl(searchString);
         if (response != null) {
             Log.w("josh", "using saved response");
@@ -165,17 +169,63 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                         displayTOC(response, searchString);
                     }
 
-//                    @Override
-//                    public void onFailure(int statusCode, Header[] headers, JSONObject error) {
-//                        Log.w("josh", "fail");
-//                    }
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                        Log.w("josh", "fail jsonObject" + throwable.toString());
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                        Log.w("josh", "fail JSONArray");
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                        Log.w("josh", "fail String");
+                    }
                 });
+    }
+
+    private String getFromNewDB()
+    {
+        String verse = "";
+
+        DataBaseHelper myDbHelper = new DataBaseHelper(this);
+
+        try {
+
+            myDbHelper.createDataBase();
+
+        } catch (IOException ioe) {
+
+            throw new Error("Unable to create database");
+
+        }
+
+        try {
+
+            myDbHelper.openDataBase();
+
+        }catch(SQLException sqle){
+
+            // throw sqle;
+            throw new Error("Unable to open database");
+        }
+
+        verse = myDbHelper.getBook();
+        return verse;
     }
 
     private void getVerses(String searchString) {
 
         Toast.makeText(this, "setting query " + searchString, Toast.LENGTH_LONG).show();
         Log.w("josh", searchString);
+
+
+        String dbText = getFromNewDB();
+        util_setTextViewText(dbText);
+        return;
+        /*
 
         // Prepare your search string to be put in a URL
         // It might have reserved characters or something
@@ -224,6 +274,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                         Log.w("josh", "fail");
                     }
                 });
+
+                */
     }
 
     private void displayVerse(JSONObject jsonObject)
@@ -234,7 +286,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         nextPage = jsonObject.optString("next");
         prevPage = jsonObject.optString("prev");
 
-        textVerses.setText(title + "\n\n\n" + hebrew);
+        util_setTextViewText(title + "\n\n\n" + hebrew);
+//        textVerses.setText(title + "\n\n\n" + hebrew);
     }
 
     private void displayTOC(JSONArray response, String url)
