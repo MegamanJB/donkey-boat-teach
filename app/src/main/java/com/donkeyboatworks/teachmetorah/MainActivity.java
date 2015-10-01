@@ -278,6 +278,45 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                 */
     }
 
+    private void translate(String word)
+    {
+        // Need to set up billing and pay for google api
+        String urlString = "https://www.googleapis.com/language/translate/v2?source=en";//&target=en&q=Hello%20world&key=KEY";
+
+        // need to url escape the word!
+        urlString = "http://api.mymemory.translated.net/get?q=" + word + "&langpair=he%7Cen";
+
+
+
+        AsyncHttpClient client = new AsyncHttpClient();
+        Log.w("josh", "sending " + urlString);
+
+        client.get(urlString,
+                new JsonHttpResponseHandler() {
+
+                    @Override
+                    public void onSuccess(int statusCode,
+                                          Header[] headers,
+                                          JSONObject response) {
+                        Log.w("josh", "success json object" + response);
+                        displayTranslation(response);
+                    }
+
+                    @Override
+                    public void onSuccess(int statusCode,
+                                          Header[] headers,
+                                          JSONArray response) {
+                        Log.w("josh", "success got json array" + response);
+                        //displayVerse(response);
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String errStr, Throwable throwable) {
+                        Log.w("josh", "fail: " + errStr + headers.toString() + throwable.toString());
+                    }
+                });
+    }
+
     private void displayVerse(JSONObject jsonObject)
     {
         String title = jsonObject.optString("heRef");
@@ -298,6 +337,15 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         // Log.w("josh",response.toString());
         String toc = getTOCText(response, 0);
         textVerses.setText(toc);
+    }
+
+    private void displayTranslation(JSONObject jsonObject)
+    {
+        JSONObject responseData = jsonObject.optJSONObject("responseData");
+        JSONObject matches = responseData.optJSONObject("matches");
+        String translatedText = responseData.optString("translatedText");
+        String match = responseData.optString("match");
+        Toast.makeText(this, "translatedText " + translatedText, Toast.LENGTH_SHORT).show();
     }
 
     private String getTOCText(JSONArray catContents, int level)
@@ -357,11 +405,34 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                 .next()) {
             String possibleWord = textViewStr.substring(start, end);
             if (Character.isLetterOrDigit(possibleWord.charAt(0))) {
-                ClickableSpan clickSpan = getClickableSpan(possibleWord);
+                ClickableSpan clickSpan = ClickableSpan_translate(possibleWord);
                 spans.setSpan(clickSpan, start, end,
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
+    }
+
+    private ClickableSpan ClickableSpan_translate(final String word) {
+        return new ClickableSpan() {
+            final String mWord;
+            {
+                mWord = word;
+            }
+
+            @Override
+            public void onClick(View widget) {
+                Log.d("tapped on:", mWord);
+                Toast.makeText(widget.getContext(), mWord, Toast.LENGTH_SHORT).show();
+                translate(mWord);
+                //String request = "https://www.googleapis.com/language/translate/v2?source=en&target=de&q=Hello%20world&key=AIzaSyC13zwX4iI3LpAdVvmnjLQo4IqdMaI7gd4";
+                //String request = SEFARIA_URL + TEXTS_URI + mWord + "." + currentPage;
+                //getVerses(request);
+            }//keytool -exportcert -alias androiddebugkey -keystore path-to-debug-or-production-keystore -list -v
+
+            public void updateDrawState(TextPaint ds) {
+                super.updateDrawState(ds);
+            }
+        };
     }
 
     private ClickableSpan getClickableSpan(final String word) {
