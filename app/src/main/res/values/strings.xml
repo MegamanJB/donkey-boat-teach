@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">TeachMeTorah</string>
+    <string name="activity_index">Index</string>
+    <string name="activity_view_text">View Text</string>
 
     <string name="defaultVerses">Loading...</string>
     <string name="action_settings">Settings</string>

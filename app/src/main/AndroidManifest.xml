@@ -20,6 +20,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ActivityIndex"
+            android:label="@string/activity_index"
+            android:parentActivityName=".MainActivity">
+        </activity>
+        <activity
+            android:name=".ActivityViewText"
+            android:label="@string/activity_view_text"
+            android:parentActivityName=".ActivityIndex">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ActivityIndex"/>
+        </activity>
     </application>
 
 </manifest>

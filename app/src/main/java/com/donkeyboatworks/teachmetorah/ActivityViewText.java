@@ -1,11 +1,11 @@
 package com.donkeyboatworks.teachmetorah;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Spannable;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
+import android.text.method.ScrollingMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.Menu;
@@ -31,7 +31,7 @@ import java.text.BreakIterator;
 import java.util.Locale;
 
 
-public class MainActivity extends ActionBarActivity implements View.OnClickListener {
+public class ActivityViewText extends ActionBarActivity implements View.OnClickListener {
 
     TextView textVerses;
     Button buttonForward;
@@ -52,13 +52,12 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_main);
-        //setContentView(R.layout.activity_index);
+        setContentView(R.layout.activity_view_text);
 
-        Intent indexIntent = new Intent(this, ActivityIndex.class);
-        startActivity(indexIntent);
+        // Enable the "Up" button for more navigation options
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-    /*    versesDB = new VersesDB(this);
+        versesDB = new VersesDB(this);
 
         textVerses = (TextView)findViewById(R.id.textVerses);
         textVerses.setMovementMethod(new ScrollingMovementMethod());
@@ -75,7 +74,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         //getTOC(request);
 
 //        String request = SEFARIA_URL + TEXTS_URI + SHULCHAN_ARUCH + "." + currentPage;
-        getVerses(request);*/
+        getVerses(request);
     }
 
     @Override
@@ -123,7 +122,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, String res) {
                         // called when response HTTP status is "200 OK"
-                        Log.w("josh", "google success "+ res);
+                        Log.w("josh", "google success " + res);
                     }
 
                     @Override
@@ -161,33 +160,33 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         params.put("more", "data");
         client.get(searchString, params, new JsonHttpResponseHandler() {
 
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONObject jsonObject) {
-                        Log.w("josh", "success jsonObject");
-                       // displayTOC(jsonObject);
-                    }
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject jsonObject) {
+                Log.w("josh", "success jsonObject");
+                // displayTOC(jsonObject);
+            }
 
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                        Log.w("josh", "success JSONArray");
-                        displayTOC(response, searchString);
-                    }
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                Log.w("josh", "success JSONArray");
+                displayTOC(response, searchString);
+            }
 
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                        Log.w("josh", "fail jsonObject" + throwable.toString());
-                    }
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                Log.w("josh", "fail jsonObject" + throwable.toString());
+            }
 
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-                        Log.w("josh", "fail JSONArray");
-                    }
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                Log.w("josh", "fail JSONArray");
+            }
 
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                        Log.w("josh", "fail String");
-                    }
-                });
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                Log.w("josh", "fail String");
+            }
+        });
     }
 
     private String getFromNewDB()
