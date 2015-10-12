@@ -25,9 +25,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import java.text.BreakIterator;
+import java.util.List;
 import java.util.Locale;
 
 
@@ -68,13 +67,15 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
         buttonBack = (Button) findViewById(R.id.buttonBack);
         buttonBack.setOnClickListener(this);
 
-        //makeRequest();
 
-        String request = SEFARIA_URL + TOC_URI;
-        //getTOC(request);
+        Bundle extras = this.getIntent().getExtras();
+        Integer bookId = null;
+        if (extras != null) {
+            bookId = (Integer) extras.get("bookId");
+        }
+        getVerses(bookId);
 
-//        String request = SEFARIA_URL + TEXTS_URI + SHULCHAN_ARUCH + "." + currentPage;
-        getVerses(request);
+        //getVerses(request);
     }
 
     @Override
@@ -110,6 +111,20 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
             e.printStackTrace();
         }
         return false;
+    }
+
+    private void getVerses(int bookId)
+    {
+        DataBaseHelper myDbHelper = DataBaseHelper.getDB(this);
+        List<Verse> verses = myDbHelper.getVerses(bookId, 1);
+
+        String displayText = "START \n";
+
+        for (Verse verse : verses)
+        {
+            displayText += verse.chapterNum + "." + verse.verseNum + ") " + verse.text + "\n\n";
+        }
+        util_setTextViewText(displayText);
     }
 
     private void makeRequest()
@@ -189,44 +204,14 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
         });
     }
 
-    private String getFromNewDB()
-    {
-        String verse = "";
-
-        DataBaseHelper myDbHelper = new DataBaseHelper(this);
-
-        try {
-
-            myDbHelper.createDataBase();
-
-        } catch (IOException ioe) {
-
-            throw new Error("Unable to create database");
-
-        }
-
-        try {
-
-            myDbHelper.openDataBase();
-
-        }catch(SQLException sqle){
-
-            // throw sqle;
-            throw new Error("Unable to open database");
-        }
-
-        verse = myDbHelper.getBook();
-        return verse;
-    }
-
     private void getVerses(String searchString) {
 
         Toast.makeText(this, "setting query " + searchString, Toast.LENGTH_LONG).show();
         Log.w("josh", searchString);
 
 
-        String dbText = getFromNewDB();
-        util_setTextViewText(dbText);
+//        String dbText = getFromNewDB();
+//        util_setTextViewText(dbText);
         return;
         /*
 

@@ -216,7 +216,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             throw new Error("Unable to open database");
         }
 
-        verse = myDbHelper.getBook();
+        verse = "";// myDbHelper.getBook();
         return verse;
     }
 

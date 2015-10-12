@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DataBaseHelper extends SQLiteOpenHelper {
 
@@ -91,6 +93,10 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return checkDB != null ? true : false;
     }
 
+    public void deleteDataBase(){
+        myContext.deleteDatabase(DB_NAME);
+    }
+
     /**
      * Copies your database from your local assets-folder to the just created empty database in the
      * system folder, from where it can be accessed and handled.
@@ -129,32 +135,173 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
     }
 
-    public String getBook()
+    public static DataBaseHelper getDB(Context context)
+    {
+        DataBaseHelper dbHelper = new DataBaseHelper(context);
+
+        // Uncomment deleteDataBase when adding a new db file, but only for one run so the file gets replaced
+        //myDbHelper.deleteDataBase();
+
+        try {
+
+            dbHelper.createDataBase();
+
+        } catch (IOException ioe) {
+
+            throw new Error("Unable to create database");
+
+        }
+
+        try {
+
+            dbHelper.openDataBase();
+
+        }catch(SQLException sqle){
+
+            // throw sqle;
+            throw new Error("Unable to open database");
+        }
+
+        return dbHelper;
+    }
+
+    public List<Book> getBooks(Integer categoryId)
     {
 
-        //Cursor cursor = myDataBase.rawQuery("SELECT locale FROM android_metadata", null);
-        //Cursor cursor = myDataBase.rawQuery( " SELECT * FROM sqlite_master", null); //name FROM sqlite_master WHERE type='table' AND name LIKE 'PR_%' ", null);
-        Cursor cursor = myDataBase.rawQuery("SELECT text FROM verse WHERE _id = 1", null);
+        String query = "SELECT _id, categoryId, name FROM book WHERE categoryId = " + categoryId.toString();
+        Log.d("Query: ", query);
+        Cursor cursor = myDataBase.rawQuery(query, null);
+        if(cursor.getCount() <= 0){
+            Log.d("Query: ", "No results!");
+            cursor.close();
+            return null;
+        }
+
         cursor.moveToFirst();
 
         try {
-            int colIdx = cursor.getColumnIndex("text");
-            String response = "";
+            int idColIdx = cursor.getColumnIndex("_id");
+            int categoryIdColIdx = cursor.getColumnIndex("categoryId");
+            int nameColIdx = cursor.getColumnIndex("name");
+            Log.d("Query: ", idColIdx + " "+  cursor.getInt(categoryIdColIdx) +" "+nameColIdx);
+
+            List<Book> books = new ArrayList<Book>();
 
             do {
-                response += cursor.getString(colIdx) + ", ";
+                books.add(new Book(
+                        cursor.getInt(idColIdx),
+                        cursor.getInt(categoryIdColIdx),
+                        cursor.getString(nameColIdx)
+                ));
             } while (cursor.moveToNext());
 
             if (!cursor.isClosed()) {
                 cursor.close();
             }
 
-            return response;
+            return books;
         }
         catch (CursorIndexOutOfBoundsException exception) {
             Log.w("Db error", exception.getMessage());
-            return "ERROR in DB";
         }
+        return null;
+    }
+
+    public List<Category> getCategories(Integer parentCategoryId)
+    {
+
+        //Cursor cursor = myDataBase.rawQuery("SELECT locale FROM android_metadata", null);
+        //Cursor cursor = myDataBase.rawQuery( " SELECT * FROM sqlite_master", null); //name FROM sqlite_master WHERE type='table' AND name LIKE 'PR_%' ", null);
+        String query = "SELECT _id, parentCategoryId, name FROM category ";
+        if (parentCategoryId != null) {
+            query += " WHERE parentCategoryId = " + parentCategoryId.toString();
+        }
+        else {
+            // I didn't insert the data correctly and now only = '' works. Probably converted that to an int or something
+            query += " WHERE parentCategoryId = '' ";
+            //query += " WHERE parentCategoryId = '0'";
+        }
+        Log.d("Query: ", query);
+        Cursor cursor = myDataBase.rawQuery(query, null);
+        if(cursor.getCount() <= 0){
+            Log.d("Query: ", "No results!");
+            cursor.close();
+            return null;
+        }
+
+        cursor.moveToFirst();
+
+        try {
+            int idColIdx = cursor.getColumnIndex("_id");
+            int parentCategoryIdColIdx = cursor.getColumnIndex("parentCategoryId");
+            int nameColIdx = cursor.getColumnIndex("name");
+            Log.d("Query: ", idColIdx + " "+  cursor.getInt(parentCategoryIdColIdx) +" "+nameColIdx);
+
+            List<Category> categories = new ArrayList<Category>();
+
+            do {
+                categories.add(new Category(
+                        cursor.getInt(idColIdx),
+                        cursor.getInt(parentCategoryIdColIdx),
+                        cursor.getString(nameColIdx)
+                ));
+            } while (cursor.moveToNext());
+
+            if (!cursor.isClosed()) {
+                cursor.close();
+            }
+
+            return categories;
+        }
+        catch (CursorIndexOutOfBoundsException exception) {
+            Log.w("Db error", exception.getMessage());
+        }
+        return null;
+    }
+
+    List<Verse> getVerses(Integer bookId, Integer chapterNum)
+    {
+        String query = "SELECT _id, bookId, chapterNum, verseNum, text FROM verse " +
+                "WHERE bookId = " + bookId.toString() + " AND chapterNum = " + chapterNum.toString();
+        Log.d("Query: ", query);
+        Cursor cursor = myDataBase.rawQuery(query, null);
+        if(cursor.getCount() <= 0){
+            Log.d("Query: ", "No results!");
+            cursor.close();
+            return null;
+        }
+
+        cursor.moveToFirst();
+
+        try {
+            int idColIdx = cursor.getColumnIndex("_id");
+            int bookIdColIdx = cursor.getColumnIndex("bookId");
+            int chapterNumColIdx = cursor.getColumnIndex("chapterNum");
+            int verseNumColIdx = cursor.getColumnIndex("verseNum");
+            int textColIdx = cursor.getColumnIndex("text");
+
+            List<Verse> verses = new ArrayList<Verse>();
+
+            do {
+                verses.add(new Verse(
+                        cursor.getInt(idColIdx),
+                        cursor.getInt(bookIdColIdx),
+                        cursor.getInt(chapterNumColIdx),
+                        cursor.getInt(verseNumColIdx),
+                        cursor.getString(textColIdx)
+                ));
+            } while (cursor.moveToNext());
+
+            if (!cursor.isClosed()) {
+                cursor.close();
+            }
+
+            return verses;
+        }
+        catch (CursorIndexOutOfBoundsException exception) {
+            Log.w("Db error", exception.getMessage());
+        }
+        return null;
     }
 
     @Override
