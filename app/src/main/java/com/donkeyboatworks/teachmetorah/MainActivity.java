@@ -58,6 +58,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         Intent indexIntent = new Intent(this, ActivityIndex.class);
         startActivity(indexIntent);
 
+        // second change
+
     /*    versesDB = new VersesDB(this);
 
         textVerses = (TextView)findViewById(R.id.textVerses);

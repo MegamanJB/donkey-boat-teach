@@ -121,6 +121,7 @@ public class ActivityIndex extends ActionBarActivity implements View.OnClickList
             viewTextIntent.putExtra("bookId", book.id);
             startActivity(viewTextIntent);
         }
+    //added change
 
     }
 }
