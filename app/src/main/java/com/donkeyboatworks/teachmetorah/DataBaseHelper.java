@@ -140,7 +140,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         DataBaseHelper dbHelper = new DataBaseHelper(context);
 
         // Uncomment deleteDataBase when adding a new db file, but only for one run so the file gets replaced
-        //myDbHelper.deleteDataBase();
+        // dbHelper.deleteDataBase();
 
         try {
 
@@ -163,6 +163,39 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         }
 
         return dbHelper;
+    }
+
+    public String query(String query)
+    {
+        Log.d("Query: ", query);
+        Cursor cursor = myDataBase.rawQuery(query, null);
+        String results = "";
+
+        try {
+            if(cursor.getCount() > 0) {
+
+                cursor.moveToFirst();
+                String[] cols = cursor.getColumnNames();
+                String row = "--------";
+
+                do {
+                    for (String col : cols) {
+                        int idx = cursor.getColumnIndex(col);
+                        row += col + ": " + cursor.getString(idx) + "|";
+                    }
+
+                } while (cursor.moveToNext());
+                results += row + "_______\n";
+
+                if (!cursor.isClosed()) {
+                    cursor.close();
+                }
+            }
+        }
+        catch (CursorIndexOutOfBoundsException exception) {
+            Log.w("Db error", exception.getMessage());
+        }
+        return results;
     }
 
     public List<Book> getBooks(Integer categoryId)

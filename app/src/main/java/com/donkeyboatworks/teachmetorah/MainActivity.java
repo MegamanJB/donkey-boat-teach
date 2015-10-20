@@ -55,6 +55,10 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         //setContentView(R.layout.activity_main);
         //setContentView(R.layout.activity_index);
 
+        DataBaseHelper myDbHelper = DataBaseHelper.getDB(this);
+        //String results = myDbHelper.query("select bookId,chapterNum,count(*) from verse group by bookId,chapterNum");
+        //Log.w("TEST", results);
+
         Intent indexIntent = new Intent(this, ActivityIndex.class);
         startActivity(indexIntent);
 
