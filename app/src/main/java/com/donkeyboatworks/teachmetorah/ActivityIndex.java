@@ -46,8 +46,16 @@ public class ActivityIndex extends ActionBarActivity implements View.OnClickList
 
         Bundle extras = this.getIntent().getExtras();
         Integer parentCategoryId = null;
+        Integer bookId = null;
         if (extras != null) {
             parentCategoryId = (Integer) extras.get("parentCategoryId");
+            display_books(parentCategoryId);
+            return;
+        }
+        if (extras != null) {
+            bookId= (Integer) extras.get("bookId");
+            display_chapters(bookId);
+            return;
         }
         display_categories(parentCategoryId);
     }
@@ -98,6 +106,26 @@ public class ActivityIndex extends ActionBarActivity implements View.OnClickList
             mArrayAdapter.notifyDataSetChanged();
         }
     }
+    
+    private void display_chapters(Integer parentCategoryId)
+    {
+        DataBaseHelper myDbHelper = DataBaseHelper.getDB(this);
+        List<Book> books = myDbHelper.getBooks(parentCategoryId);
+
+        if (books == null) {
+            return;
+        }
+        nameToBook = new HashMap<>();
+
+        for (Book book : books) {
+            Log.w("index", "adding " + book.name);
+
+            mNameList.add(book.name);
+            nameToBook.put(book.name, book);
+
+            mArrayAdapter.notifyDataSetChanged();
+        }
+    }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -117,9 +145,13 @@ public class ActivityIndex extends ActionBarActivity implements View.OnClickList
         {
             Book book = nameToBook.get(name);
 
-            Intent viewTextIntent = new Intent(this, ActivityViewText.class);
+            intent indexIntent = new Intent(this, ActivityIndex.class);
+            indexIntent.putExtra("bookId", book.id);
+            startActivity(indexIntent);
+
+            /* Intent viewTextIntent = new Intent(this, ActivityViewText.class);
             viewTextIntent.putExtra("bookId", book.id);
-            startActivity(viewTextIntent);
+            startActivity(viewTextIntent);*/
         }
 
     }
