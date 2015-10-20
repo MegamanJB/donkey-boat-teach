@@ -106,6 +106,26 @@ public class ActivityIndex extends ActionBarActivity implements View.OnClickList
             mArrayAdapter.notifyDataSetChanged();
         }
     }
+    
+    private void display_chapters(Integer parentCategoryId)
+    {
+        DataBaseHelper myDbHelper = DataBaseHelper.getDB(this);
+        List<Book> books = myDbHelper.getBooks(parentCategoryId);
+
+        if (books == null) {
+            return;
+        }
+        nameToBook = new HashMap<>();
+
+        for (Book book : books) {
+            Log.w("index", "adding " + book.name);
+
+            mNameList.add(book.name);
+            nameToBook.put(book.name, book);
+
+            mArrayAdapter.notifyDataSetChanged();
+        }
+    }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
