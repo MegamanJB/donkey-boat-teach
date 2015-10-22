@@ -70,10 +70,12 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
 
         Bundle extras = this.getIntent().getExtras();
         Integer bookId = null;
+        Integer chapterNum = 1;
         if (extras != null) {
             bookId = (Integer) extras.get("bookId");
+            chapterNum = (Integer) extras.get("chapterNum");
         }
-        getVerses(bookId);
+        getVerses(bookId, chapterNum);
 
         //getVerses(request);
     }
@@ -113,12 +115,12 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
         return false;
     }
 
-    private void getVerses(int bookId)
+    private void getVerses(int bookId, int chapterNum)
     {
         DataBaseHelper myDbHelper = DataBaseHelper.getDB(this);
-        List<Verse> verses = myDbHelper.getVerses(bookId, 1);
+        List<Verse> verses = myDbHelper.getVerses(bookId, chapterNum);
 
-        String displayText = "START \n";
+        String displayText = "";
 
         for (Verse verse : verses)
         {

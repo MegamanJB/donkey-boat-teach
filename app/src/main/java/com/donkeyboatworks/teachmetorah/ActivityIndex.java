@@ -21,6 +21,8 @@ import java.util.Map;
  */
 public class ActivityIndex extends ActionBarActivity implements View.OnClickListener, AdapterView.OnItemClickListener {
 
+    final String CHAPTER_PREFIX = "Chapter: ";
+
     TextView names;
     Button mainButton;
     ListView mainListView;
@@ -28,6 +30,7 @@ public class ActivityIndex extends ActionBarActivity implements View.OnClickList
     ArrayList mNameList = new ArrayList();
     Map<String, Category> nameToCategory;
     Map<String, Book> nameToBook;
+    Integer curBookId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +60,7 @@ public class ActivityIndex extends ActionBarActivity implements View.OnClickList
             bookId = (Integer) extras.get("bookId");
             Log.w("bookId", bookId.toString());
             if (bookId != null) {
+                curBookId = bookId;
                 display_chapters(bookId);
                 return;
             }
@@ -124,8 +128,8 @@ public class ActivityIndex extends ActionBarActivity implements View.OnClickList
 
         for (Chapter chapter: chapters) {
             Log.w("index", "adding " + chapter.chapterNum);
-
-            mNameList.add("Chapter " + chapter.chapterNum);
+            
+            mNameList.add(CHAPTER_PREFIX + chapter.chapterNum);
             mArrayAdapter.notifyDataSetChanged();
         }
     }
@@ -134,7 +138,7 @@ public class ActivityIndex extends ActionBarActivity implements View.OnClickList
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
         String name = mNameList.get(position).toString();
-        Log.d("Index Selection", position + ": " +name);
+        Log.d("Index Selection", position + ": " + name);
 
         if (nameToCategory != null && nameToCategory.containsKey(name))
         {
@@ -144,17 +148,20 @@ public class ActivityIndex extends ActionBarActivity implements View.OnClickList
             indexIntent.putExtra("parentCategoryId", category.id);
             startActivity(indexIntent);
         }
-        else if (nameToBook.containsKey(name))
+        else if (nameToBook != null && nameToBook.containsKey(name))
         {
             Book book = nameToBook.get(name);
 
             Intent indexIntent = new Intent(this, ActivityIndex.class);
             indexIntent.putExtra("bookId", book.id);
             startActivity(indexIntent);
-
-            /* Intent viewTextIntent = new Intent(this, ActivityViewText.class);
-            viewTextIntent.putExtra("bookId", book.id);
-            startActivity(viewTextIntent);*/
+        }
+        else if (curBookId != null) {
+            Integer chapterNum = new Integer(name.substring(CHAPTER_PREFIX.length()));
+            Intent viewTextIntent = new Intent(this, ActivityViewText.class);
+            viewTextIntent.putExtra("bookId", curBookId);
+            viewTextIntent.putExtra("chapterNum", chapterNum);
+            startActivity(viewTextIntent);
         }
 
     }
