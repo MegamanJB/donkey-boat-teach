@@ -198,6 +198,43 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return results;
     }
 
+    public List<Chapter> getChapters(Integer bookId)
+    {
+
+        String query = "SELECT DISTINCT chapterNum FROM verse WHERE bookId = " + bookId.toString();
+        Log.d("Query: ", query);
+        Cursor cursor = myDataBase.rawQuery(query, null);
+        if(cursor.getCount() <= 0){
+            Log.d("Query: ", "No results!");
+            cursor.close();
+            return null;
+        }
+
+        cursor.moveToFirst();
+
+        try {
+            int chapterNumColIdx = cursor.getColumnIndex("chapterNum");
+            List<Chapter> chapters = new ArrayList<Chapter>();
+
+            do {
+                chapters.add(new Chapter(
+                        bookId,
+                        cursor.getInt(chapterNumColIdx)
+                ));
+            } while (cursor.moveToNext());
+
+            if (!cursor.isClosed()) {
+                cursor.close();
+            }
+
+            return chapters;
+        }
+        catch (CursorIndexOutOfBoundsException exception) {
+            Log.w("Db error", exception.getMessage());
+        }
+        return null;
+    }
+
     public List<Book> getBooks(Integer categoryId)
     {
 

@@ -49,14 +49,20 @@ public class ActivityIndex extends ActionBarActivity implements View.OnClickList
         Integer bookId = null;
         if (extras != null) {
             parentCategoryId = (Integer) extras.get("parentCategoryId");
-            display_books(parentCategoryId);
-            return;
+            if (parentCategoryId != null) {
+                display_books(parentCategoryId);
+                return;
+            }
+
+            bookId = (Integer) extras.get("bookId");
+            Log.w("bookId", bookId.toString());
+            if (bookId != null) {
+                display_chapters(bookId);
+                return;
+            }
         }
-        if (extras != null) {
-            bookId= (Integer) extras.get("bookId");
-            display_chapters(bookId);
-            return;
-        }
+
+        Log.w("init", "display cats");
         display_categories(parentCategoryId);
     }
 
@@ -107,22 +113,19 @@ public class ActivityIndex extends ActionBarActivity implements View.OnClickList
         }
     }
     
-    private void display_chapters(Integer parentCategoryId)
+    private void display_chapters(Integer bookId)
     {
         DataBaseHelper myDbHelper = DataBaseHelper.getDB(this);
-        List<Book> books = myDbHelper.getBooks(parentCategoryId);
+        List<Chapter> chapters = myDbHelper.getChapters(bookId);
 
-        if (books == null) {
+        if (chapters == null) {
             return;
         }
-        nameToBook = new HashMap<>();
 
-        for (Book book : books) {
-            Log.w("index", "adding " + book.name);
+        for (Chapter chapter: chapters) {
+            Log.w("index", "adding " + chapter.chapterNum);
 
-            mNameList.add(book.name);
-            nameToBook.put(book.name, book);
-
+            mNameList.add("Chapter " + chapter.chapterNum);
             mArrayAdapter.notifyDataSetChanged();
         }
     }
@@ -145,7 +148,7 @@ public class ActivityIndex extends ActionBarActivity implements View.OnClickList
         {
             Book book = nameToBook.get(name);
 
-            intent indexIntent = new Intent(this, ActivityIndex.class);
+            Intent indexIntent = new Intent(this, ActivityIndex.class);
             indexIntent.putExtra("bookId", book.id);
             startActivity(indexIntent);
 
