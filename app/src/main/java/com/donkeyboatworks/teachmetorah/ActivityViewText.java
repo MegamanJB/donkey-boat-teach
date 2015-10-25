@@ -1,15 +1,15 @@
 package com.donkeyboatworks.teachmetorah;
 
 import android.os.Bundle;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.text.Spannable;
 import android.text.TextPaint;
-import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -25,9 +25,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.BreakIterator;
 import java.util.List;
-import java.util.Locale;
 
 
 public class ActivityViewText extends ActionBarActivity implements View.OnClickListener {
@@ -60,6 +58,11 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
 
         textVerses = (TextView)findViewById(R.id.textVerses);
         textVerses.setMovementMethod(new ScrollingMovementMethod());
+        textVerses.setOnTouchListener(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                return handleOnTouch(v, event);
+            }
+        });
 
         buttonForward = (Button) findViewById(R.id.buttonForward);
         buttonForward.setOnClickListener(this);
@@ -78,6 +81,49 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
         getVerses(bookId, chapterNum);
 
         //getVerses(request);
+    }
+
+    public boolean handleOnTouch(View v, MotionEvent event)
+    {
+        int action = MotionEventCompat.getActionMasked(event);
+
+        switch(action) {
+            case (MotionEvent.ACTION_DOWN) :
+                Log.d("onTouch","Action was DOWN");
+                //return true;
+            case (MotionEvent.ACTION_MOVE) :
+                Log.d("onTouch","Action was MOVE");
+                //return true;
+            case (MotionEvent.ACTION_UP) :
+                Log.d("onTouch","Action was UP");
+                int x = (int) event.getX();
+                int y = (int) event.getY();
+                int offset = textVerses.getOffsetForPosition(x, y);
+                int startRange = offset - 10;
+                int endRange = offset+10;
+                String text = textVerses.getText().toString();
+                if(startRange < 0) {
+                    startRange = 0;
+                }
+                if (endRange > text.length()-1) {
+                    endRange = text.length()-1;
+                }
+
+                String clickedAroundStr = text.substring(startRange, endRange);
+
+                Log.d("onTouch", "clickedAroundStr: " + clickedAroundStr);
+                //return true;
+            case (MotionEvent.ACTION_CANCEL) :
+                Log.d("onTouch","Action was CANCEL");
+                //return true;
+            case (MotionEvent.ACTION_OUTSIDE) :
+                Log.d("onTouch","Movement occurred outside bounds " +
+                        "of current screen element");
+                //return true;
+            default :
+                Log.d("onTouch","default");
+        }
+        return false;
     }
 
     @Override
@@ -380,26 +426,26 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
 
     private void util_setTextViewText(final String textViewStr)
     {
-        //textVerses.setText(textViewStr);
+        textVerses.setText(textViewStr);
 
         //String definition = "Clickable words in text view ".trim();
         //TextView definitionView = (TextView) findViewById(R.id.text);
 
-        textVerses.setMovementMethod(LinkMovementMethod.getInstance());
-        textVerses.setText(textViewStr, TextView.BufferType.SPANNABLE);
-        Spannable spans = (Spannable) textVerses.getText();
-        BreakIterator iterator = BreakIterator.getWordInstance(Locale.US);
-        iterator.setText(textViewStr);
-        int start = iterator.first();
-        for (int end = iterator.next(); end != BreakIterator.DONE; start = end, end = iterator
-                .next()) {
-            String possibleWord = textViewStr.substring(start, end);
-            if (Character.isLetterOrDigit(possibleWord.charAt(0))) {
-                ClickableSpan clickSpan = ClickableSpan_translate(possibleWord);
-                spans.setSpan(clickSpan, start, end,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
-        }
+//        textVerses.setMovementMethod(LinkMovementMethod.getInstance());
+//        textVerses.setText(textViewStr, TextView.BufferType.SPANNABLE);
+//        Spannable spans = (Spannable) textVerses.getText();
+//        BreakIterator iterator = BreakIterator.getWordInstance(Locale.US);
+//        iterator.setText(textViewStr);
+//        int start = iterator.first();
+//        for (int end = iterator.next(); end != BreakIterator.DONE; start = end, end = iterator
+//                .next()) {
+//            String possibleWord = textViewStr.substring(start, end);
+//            if (Character.isLetterOrDigit(possibleWord.charAt(0))) {
+//                ClickableSpan clickSpan = ClickableSpan_translate(possibleWord);
+//                spans.setSpan(clickSpan, start, end,
+//                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//            }
+//        }
     }
 
     private ClickableSpan ClickableSpan_translate(final String word) {
