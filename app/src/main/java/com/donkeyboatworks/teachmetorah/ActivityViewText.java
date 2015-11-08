@@ -11,7 +11,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +27,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -33,6 +36,10 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
     TextView textVerses;
     Button buttonForward;
     Button buttonBack;
+
+    ListView translationListView;
+    ArrayAdapter mArrayAdapter;
+    ArrayList mTranslationList = new ArrayList();
 
     VersesDB versesDB;
 
@@ -64,11 +71,18 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
             }
         });
 
-        buttonForward = (Button) findViewById(R.id.buttonForward);
-        buttonForward.setOnClickListener(this);
+        translationListView = (ListView) findViewById(R.id.translation_listview);
+        mArrayAdapter = new ArrayAdapter(this,
+                android.R.layout.simple_list_item_1,
+                mTranslationList);
+        translationListView.setAdapter(mArrayAdapter);
 
-        buttonBack = (Button) findViewById(R.id.buttonBack);
-        buttonBack.setOnClickListener(this);
+
+//        buttonForward = (Button) findViewById(R.id.buttonForward);
+//        buttonForward.setOnClickListener(this);
+//
+//        buttonBack = (Button) findViewById(R.id.buttonBack);
+//        buttonBack.setOnClickListener(this);
 
 
         Bundle extras = this.getIntent().getExtras();
@@ -90,10 +104,12 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
         switch(action) {
             case (MotionEvent.ACTION_DOWN) :
                 Log.d("onTouch","Action was DOWN");
-                //return true;
+                return true;
+
             case (MotionEvent.ACTION_MOVE) :
                 Log.d("onTouch","Action was MOVE");
-                //return true;
+                return true;
+
             case (MotionEvent.ACTION_UP) :
                 Log.d("onTouch","Action was UP");
                 int x = (int) event.getX();
@@ -102,14 +118,17 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
                 translate(clickedWord);
 
                 Log.d("onTouch", "clickedAroundStr: " + clickedWord);
-                //return true;
+                return true;
+
             case (MotionEvent.ACTION_CANCEL) :
                 Log.d("onTouch","Action was CANCEL");
-                //return true;
+                return true;
+
             case (MotionEvent.ACTION_OUTSIDE) :
                 Log.d("onTouch","Movement occurred outside bounds " +
                         "of current screen element");
-                //return true;
+                return true;
+
             default :
                 Log.d("onTouch","default");
         }
@@ -327,7 +346,7 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
                 */
     }
 
-    private void translate(String word)
+    private void translate(final String word)
     {
        // Illegal character in query at index 47: http://api.mymemory.translated.net/get?q=%20?':</i>
 
@@ -352,7 +371,7 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
                                           Header[] headers,
                                           JSONObject response) {
                         Log.w("josh", "success json object" + response);
-                        displayTranslation(response);
+                        displayTranslation(word, response);
                     }
 
                     @Override
@@ -392,16 +411,19 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
         textVerses.setText(toc);
     }
 
-    private void displayTranslation(JSONObject jsonObject)
+    private void displayTranslation(String word, JSONObject jsonObject)
     {
         JSONObject responseData = jsonObject.optJSONObject("responseData");
         JSONObject matches = responseData.optJSONObject("matches");
         String translatedText = responseData.optString("translatedText");
         String match = responseData.optString("match");
 
+        String displayText = word + " = " + translatedText;
 
+        mTranslationList.add(displayText);
+        mArrayAdapter.notifyDataSetChanged();
 
-        Toast.makeText(this, "translatedText " + translatedText, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, displayText, Toast.LENGTH_SHORT).show();
     }
 
     private String getTOCText(JSONArray catContents, int level)
