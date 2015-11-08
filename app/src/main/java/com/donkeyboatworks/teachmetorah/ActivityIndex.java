@@ -37,8 +37,8 @@ public class ActivityIndex extends ActionBarActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_index);
 
-        mainButton = (Button) findViewById(R.id.main_button);
-        mainButton.setOnClickListener(this);
+//        mainButton = (Button) findViewById(R.id.main_button);
+//        mainButton.setOnClickListener(this);
 
         mainListView = (ListView) findViewById(R.id.main_listview);
         mArrayAdapter = new ArrayAdapter(this,
