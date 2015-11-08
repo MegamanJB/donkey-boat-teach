@@ -98,20 +98,10 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
                 Log.d("onTouch","Action was UP");
                 int x = (int) event.getX();
                 int y = (int) event.getY();
-                int offset = textVerses.getOffsetForPosition(x, y);
-                int startRange = offset - 10;
-                int endRange = offset+10;
-                String text = textVerses.getText().toString();
-                if(startRange < 0) {
-                    startRange = 0;
-                }
-                if (endRange > text.length()-1) {
-                    endRange = text.length()-1;
-                }
+                String clickedWord = util_getWordAtPosition(x, y);
+                translate(clickedWord);
 
-                String clickedAroundStr = text.substring(startRange, endRange);
-
-                Log.d("onTouch", "clickedAroundStr: " + clickedAroundStr);
+                Log.d("onTouch", "clickedAroundStr: " + clickedWord);
                 //return true;
             case (MotionEvent.ACTION_CANCEL) :
                 Log.d("onTouch","Action was CANCEL");
@@ -146,6 +136,29 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private String util_getWordAtPosition(int x, int y)
+    {
+        int offset = textVerses.getOffsetForPosition(x, y);
+        int startRange = offset;
+        int endRange = offset+1;
+        String text = textVerses.getText().toString();
+
+        char curChar = text.charAt(startRange);
+        while (startRange > 0 && curChar != ' ') {
+            startRange--;
+            curChar = text.charAt(startRange);
+        }
+
+        curChar = text.charAt(endRange);
+        while (endRange < text.length()-1 && curChar != ' ') {
+            endRange++;
+            curChar = text.charAt(endRange);
+        }
+
+        String clickedWord = text.substring(startRange, endRange);
+        return clickedWord;
     }
 
     public Boolean isOnline() {
@@ -316,6 +329,10 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
 
     private void translate(String word)
     {
+       // Illegal character in query at index 47: http://api.mymemory.translated.net/get?q=%20?':</i>
+
+
+
         // Need to set up billing and pay for google api
         String urlString = "https://www.googleapis.com/language/translate/v2?source=en";//&target=en&q=Hello%20world&key=KEY";
 
@@ -381,6 +398,9 @@ public class ActivityViewText extends ActionBarActivity implements View.OnClickL
         JSONObject matches = responseData.optJSONObject("matches");
         String translatedText = responseData.optString("translatedText");
         String match = responseData.optString("match");
+
+
+
         Toast.makeText(this, "translatedText " + translatedText, Toast.LENGTH_SHORT).show();
     }
 
